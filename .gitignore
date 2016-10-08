@@ -1,0 +1,4 @@
+*.html
+*.png
+node_modules
+config/*
