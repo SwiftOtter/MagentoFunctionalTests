@@ -1,8 +1,14 @@
 var helper = require('../../utils/helpers');
 
-module.exports = function(test, casper) {
+module.exports = function(test, casper, config) {
     casper.echo('Navigated to page: ' + casper.getCurrentUrl());
     test.assertExists('h1');
+
+    if (casper.exists(config.defaults.category.linkClass)) {
+        casper.echo('Found product links. May be a normal category.');
+        casper.echo('Skipping top category.....');
+        return;
+    }
 
     // Grab a random url to test:
     var urlToTarget = casper.evaluate(function(pickRandomElement) {

@@ -1,8 +1,22 @@
-// var nodemailer = require('nodemailer');
 var defaults = require('../config/defaults');
-var fs = require('fs');
 
 module.exports = {
+    parseDomainFrom: function(url) {
+        var parts = url.replace('http://','').replace('https://','').split(/[/?#]/);
+        return parts[0];
+    },
+
+    saveLogsToFile: function(logs) {
+        var time = new Date();
+        var month = time.getMonth() + 1;
+        var logFile = "data-"+ time.getFullYear() +"-"+ month +"-"+ time.getDate() +"-"+ time.getHours() +"-"+ time.getMinutes() +".html";
+
+        fs.write(logFile, logs, 'w');
+    },
+
+    // TODO: move uses to client/functions instead of here:
+    // Deprecated:
+
     getRandomIntInclusive: function(min, max) {
         min = Math.ceil(min);
         max = Math.floor(max);
@@ -54,35 +68,5 @@ module.exports = {
             path: '',
             key: '',
         };
-    },
-
-    saveLogsToFile: function(logs) {
-        var time = new Date();
-        var month = time.getMonth() + 1;
-        var logFile = "data-"+ time.getFullYear() +"-"+ month +"-"+ time.getDate() +"-"+ time.getHours() +"-"+ time.getMinutes() +".html";
-
-        fs.write(logFile, logs, 'w');
-    },
-
-    // sendLogsToEmail: function() {
-    //     // create reusable transporter object using the default SMTP transport
-    //     var transporter = nodemailer.createTransport('smtps://user%40gmail.com:pass@smtp.gmail.com');
-    //
-    //     // setup e-mail data with unicode symbols
-    //     var mailOptions = {
-    //         from: '"Fred Foo ?" <foo@blurdybloop.com>', // sender address
-    //         to: 'jpmowing@gmail.com', // list of receivers
-    //         subject: 'Hello ✔', // Subject line
-    //         text: 'Hello world?', // plaintext body
-    //         html: '<b>Hello world?</b>' // html body
-    //     };
-    //
-    //     // send mail with defined transport object
-    //     transporter.sendMail(mailOptions, function(error, info){
-    //         if(error){
-    //             return console.log(error);
-    //         }
-    //         console.log('Message sent: ' + info.response);
-    //     });
-    // }
+    }
 };
