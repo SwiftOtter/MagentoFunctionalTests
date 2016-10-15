@@ -54,3 +54,23 @@ function determinePathOptions(inputArgs) {
         key: '',
     };
 }
+
+function determineProductFormValues() {
+    var required = document.querySelectorAll('.product-options .required-entry'),
+        formValues = {};
+
+    for (var i = 0; i < required.length; i++) {
+        if (required[i].tagName.toLowerCase() === 'select' || // select OR radio or checkbox
+            (required[i].tagName.toLowerCase() === 'input' && ['radio', 'checkbox'].indexOf(required[i].getAttribute('type')) > -1)) {
+            formValues['#' + required[i].getAttribute('id')] = required[i].options[1].value;
+        } else {
+            if (required[i].tagName.toLowerCase() === 'input' && required[i].getAttribute('type') === 'number') { // number input
+                formValues['#' + required[i].getAttribute('id')] = 2;
+            } else {
+                formValues['#' + required[i].getAttribute('id')] = 'casperjs test'; // regular input
+            }
+        }
+    }
+
+    return formValues;
+}

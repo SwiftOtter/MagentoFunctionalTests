@@ -1,29 +1,5 @@
-var helper = require('../../utils/helpers');
-
-var requiredOptionsSelector = '.product-options .required-entry';
-
-function determineValues() {
-    var required = document.querySelectorAll('.product-options .required-entry'),
-        formValues = {};
-
-    for (var i = 0; i < required.length; i++) {
-        if (required[i].tagName.toLowerCase() === 'select' || // select OR radio or checkbox
-            (required[i].tagName.toLowerCase() === 'input' && ['radio', 'checkbox'].indexOf(required[i].getAttribute('type')) > -1)) {
-            formValues['#' + required[i].getAttribute('id')] = required[i].options[1].value;
-        } else {
-            if (required[i].tagName.toLowerCase() === 'input' && required[i].getAttribute('type') === 'number') { // number input
-                formValues['#' + required[i].getAttribute('id')] = 2;
-            } else {
-                formValues['#' + required[i].getAttribute('id')] = 'casperjs test'; // regular input
-            }
-        }
-    }
-
-    return formValues;
-}
-
-module.exports = function(test, casper, config) {
-    casper.echo('Navigated to page: ' + casper.getCurrentUrl());
+module.exports = function(test) {
+    casper.otter.echoSuite('Product');
     test.assertExists('h1');
 
     test.assertExists('.qty');
@@ -33,46 +9,44 @@ module.exports = function(test, casper, config) {
     test.assertExists('.product-image');
 
     // Product with required options:
-    if (casper.exists(requiredOptionsSelector)) {
-        casper.echo('Found required options');
+    if (this.exists(this.options.env.product.requiredOptionSelector)) {
+        this.echo('Found required options');
 
-        var values = casper.evaluate(function(determineValues) {
-            return determineValues();
-        }, determineValues);
+        var values = this.evaluate(function() {
+            return determineProductFormValues();
+        });
 
 
-        casper.echo('Choosing values:');
+        this.echo('Choosing values:');
         for (var key in values) {
-            casper.echo('    '+ key +': '+ values[key]);
+            this.echo('    '+ key +': '+ values[key]);
         }
 
-        casper.fillSelectors('.product-options', values);
-        casper.capture('after-select.png');
+        this.fillSelectors('.product-options', values);
+        this.otterCapture.capture('after-select.png');
     }
 
-    var selectorToTarget = casper.evaluate(function(getRandomIntInclusive) {
+    var selectorToTarget = this.evaluate(function() {
         var allElements = document.querySelectorAll('.qty');
 
         return '#' +allElements[getRandomIntInclusive(0, allElements.length - 1)].getAttribute('id');
-    }, helper.getRandomIntInclusive);
+    });
 
-    config.productData = {
-        sku: casper.getElementAttribute(selectorToTarget, 'data-sku'),
-        title: casper.fetchText('.product-name')
+    this.options.productData = {
+        sku: this.getElementAttribute(selectorToTarget, 'data-sku'),
+        title: this.fetchText('.product-name')
     };
 
     var formValues = {};
     formValues[selectorToTarget] = '1';
 
-    casper.fillSelectors('form#product_addtocart_form', formValues);
-    casper.echo('Picking sub-product: ' + selectorToTarget);
+    this.fillSelectors('form#product_addtocart_form', formValues);
+    this.echo('Picking sub-product: ' + selectorToTarget);
 
-    casper.click('.btn-cart');
-    casper.waitForResource(/.*checkout\/cart\/add.*/, function () {
-        casper.echo('Product rejected or added to cart');
-        casper.capture('after-add.png');
-        casper.open(config.baseUrl + 'checkout/cart');
+    this.click('.btn-cart');
+    this.waitForResource(/.*checkout\/cart\/add.*/, function () {
+        this.echo('Product rejected or added to cart');
+        this.otterCapture.capture('after-add.png');
+        this.open(this.options.baseUrl + 'checkout/cart');
     });
-
-    return config.productData;
 };

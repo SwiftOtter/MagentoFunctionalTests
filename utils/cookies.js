@@ -38,21 +38,6 @@ function clearAllCookies() {
     }
 };
 
-// module.exports.persistOLD = function() {
-//     removeRobotCookie();
-//
-//     var cookies = JSON.stringify(phantom.cookies);
-//     fs.write(cookiePath, cookies, 644);
-// };
-//
-// module.exports.clear = function() {
-//     removeRobotCookie();
-//
-//     if (fs.isFile(cookiePath)) {
-//         fs.remove(cookiePath);
-//     }
-// };
-
 module.exports.shutdown = function() {
     removeRobotCookie();
 

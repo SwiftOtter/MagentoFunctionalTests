@@ -1,4 +1,6 @@
-var defaults = require('../config/defaults');
+var require = patchRequire(require),
+    defaults = require('config/defaults'),
+    colorizer = require('colorizer').create('Colorizer');
 
 module.exports = {
     parseDomainFrom: function(url) {
@@ -6,67 +8,54 @@ module.exports = {
         return parts[0];
     },
 
-    saveLogsToFile: function(logs) {
-        var time = new Date();
-        var month = time.getMonth() + 1;
-        var logFile = "data-"+ time.getFullYear() +"-"+ month +"-"+ time.getDate() +"-"+ time.getHours() +"-"+ time.getMinutes() +".html";
-
-        fs.write(logFile, logs, 'w');
-    },
-
-    // TODO: move uses to client/functions instead of here:
-    // Deprecated:
-
-    getRandomIntInclusive: function(min, max) {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    },
-
     substring: function(needle, haystack) {
         return haystack.substring(haystack.indexOf(needle), haystack.indexOf(needle) + needle.length);
     },
 
-    pickRandomElement: function(selector, attribute) {
-        var elements = null;
-
-        if (typeof selector !== 'string') {
-             elements = selector
-        }
-
-        if (elements === null) {
-            elements = document.querySelectorAll(selector);
-        }
-
-        var targetElement = elements[Math.floor(Math.random() * elements.length)];
-
-        if (!targetElement) {
-            targetElement = elements[0];
-            console.log('WARNING: choose first element from selector "'+ selector +'"');
-        }
-
-        return targetElement.getAttribute(attribute);
+    /**
+     * Echos suite name and current URL to command. Takes a screen capture.
+     *
+     * @param suiteName
+     */
+    echoSuite: function(suiteName) {
+        casper.echo('Running '+ colorizer.colorize(suiteName, 'PARAMETER') +' test suite');
+        casper.echo('Navigated to page: ' + casper.getCurrentUrl());
+        casper.otterCapture.capture(suiteName + '-init.png');
     },
 
-    determinePathOptions: function(inputArgs) {
-        var targetKey = '';
+    /**
+     * Returns a string with color.
+     *
+     * @param param
+     * @returns {String}
+     */
+    colorParam: function(param) {
+        return colorizer.colorize(param, 'PARAMETER');
+    },
 
-        for (var key in inputArgs) {
+    /**
+     * Determine if one of the arguments provides maps to an acceptable path.
+     *
+     * @param inputArgs
+     * @returns {*}
+     */
+    determinePathOptions: function(inputArgs) {
+        var targetKey = '',
+            key;
+
+        for (key in inputArgs) {
             if (inputArgs.hasOwnProperty(key) && defaults.paths.indexOf(key) > -1) {
                 targetKey = key;
             }
         }
 
-        if (inputArgs[key]) {
+        if (inputArgs[targetKey]) {
             return {
                 path: inputArgs[targetKey],
                 key: targetKey
             };
         }
 
-        return {
-            path: '',
-            key: '',
-        };
+        return {};
     }
 };
